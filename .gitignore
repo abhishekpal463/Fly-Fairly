@@ -1,0 +1,60 @@
+# Dependencies
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+/dist
+/backend/dist
+*.js
+*.js.map
+*.d.ts
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Runtime
+.sqlite
+*.db
+*.sqlite3
+
+# ES & cache data
+esdata/
+.cache/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Python (for ETL if needed)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# ETL data (keep artifacts from runs for audit)
+data/staging/
+data/output/
+*.csv.bak
