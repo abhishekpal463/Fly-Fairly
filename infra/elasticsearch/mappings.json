@@ -1,0 +1,36 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "en_analyzer": { "type": "custom", "tokenizer": "standard", "filter": ["lowercase","asciifolding"] },
+        "ascii_analyzer": { "type": "custom", "tokenizer": "standard", "filter": ["lowercase","asciifolding"] }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "entity_type": { "type": "keyword" },
+      "iata_code": { "type": "keyword" },
+      "icao_code": { "type": "keyword" },
+      "names": {
+        "properties": {
+          "en": { "type": "search_as_you_type", "analyzer": "en_analyzer", "max_shingle_size": 2 },
+          "ja": { "type": "search_as_you_type", "analyzer": "kuromoji", "max_shingle_size": 2 },
+          "zh": { "type": "search_as_you_type", "analyzer": "ik_max_word", "max_shingle_size": 2 },
+          "ar": { "type": "search_as_you_type", "analyzer": "arabic", "max_shingle_size": 2 },
+          "aliases": { "type": "search_as_you_type", "analyzer": "ascii_analyzer", "max_shingle_size": 2 }
+        }
+      },
+      "name_combined": { "type": "search_as_you_type", "analyzer": "en_analyzer", "max_shingle_size": 2 },
+      "names_all": { "type": "text", "analyzer": "ascii_analyzer" },
+      "region_name": { "type": "search_as_you_type", "analyzer": "en_analyzer" },
+      "country_name": { "type": "keyword" },
+      "location": { "type": "geo_point" },
+      "associated_airports": { "type": "keyword" },
+      "annual_passengers": { "type": "long" },
+      "population": { "type": "long" },
+      "popularity_score": { "type": "rank_feature", "positive_score_impact": true },
+      "has_scheduled_service": { "type": "boolean" }
+    }
+  }
+}
