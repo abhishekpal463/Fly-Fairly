@@ -23,7 +23,7 @@ services:
 
   app:
     build:
-      context: ../../
+      context: ..
       dockerfile: infra/Dockerfile
     container_name: aa_app
     depends_on:
@@ -36,8 +36,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ../../:/workspace
-    command: ["npm","run","dev"]
+      - ..:/workspace
+    command: ["npm", "run", "dev"]
 
 volumes:
   esdata:
