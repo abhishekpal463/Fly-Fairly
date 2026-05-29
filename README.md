@@ -8,13 +8,12 @@ Production-quality airport and city autocomplete service built with Node.js + Ex
 airport-autocomplete/
 ├── backend/
 │   └── src/
-│       ├── index.ts           # Express app entry point
+│       ├── index.js           # Express app entry point
 │       ├── routes/            # API route handlers
 │       ├── services/          # Business logic (ES client, query builder)
 │       └── indexer/           # Bulk indexing logic
 ├── data/
-│   └── etl/
-│       └── ingest_ourairports.ts  # ETL pipeline (OurAirports → SQLite → ES)
+│   └── etl/                   # Python ETL pipeline scripts
 ├── infra/
 │   ├── docker-compose.yml     # Local ES + Redis + App
 │   └── elasticsearch/
@@ -24,7 +23,6 @@ airport-autocomplete/
 │       ├── harness.js         # Golden query evaluation
 │       └── regressions.json   # Test cases
 ├── package.json               # Dependencies
-├── tsconfig.json              # TypeScript config
 └── Plan.md                    # Architecture & implementation plan
 ```
 
@@ -58,22 +56,22 @@ curl http://localhost:9200
 npm run dev
 ```
 
-Server will start on `http://localhost:3000`
+Server will start on `http://localhost:3000` using Node.js `--watch` mode.
 
 Health check: `http://localhost:3000/health`
 
-### ETL: Ingest Data
+### Index Data to Elasticsearch
+
+Ensure local Elasticsearch is running, then run the bulk indexer:
 
 ```bash
-npm run etl:ingest
+node backend/src/indexer/indexToEs.js
 ```
 
 This will:
-1. Download OurAirports CSV
-2. Normalize, clean, and dedupe airports
-3. Compute popularity scores
-4. Emit city/metro documents (MACs)
-5. Bulk index to Elasticsearch
+1. Load data from the SQLite staging DB (`data/staging/airports.db`)
+2. Format airport and city documents
+3. Bulk index them into the Elasticsearch index `airports_v1`
 
 ### Run Evaluation Harness
 
@@ -87,7 +85,6 @@ Tests golden queries against the API and compares results to baseline.
 
 ```bash
 npm test
-npm run test:watch
 ```
 
 ## API Endpoints
@@ -161,28 +158,6 @@ See [Plan.md](./Plan.md) for detailed architecture, decisions, and step-by-step 
 - **Hour 3–4:** Build evaluation harness, test golden queries
 - **Hour 4–5:** Write approach memo, prepare demo
 
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-TypeScript output goes to `backend/dist/`
-
-### Linting
-
-```bash
-npm run lint
-```
-
-### Type Checking
-
-```bash
-npx tsc --noEmit
-```
-
 ## Troubleshooting
 
 ### ES Connection Fails
@@ -201,7 +176,7 @@ npx tsc --noEmit
 ## Key Decisions
 
 1. **Search Engine:** Elasticsearch (self-hosted) with fallback support for OpenSearch
-2. **Backend:** Node.js + Express (prototype) with TypeScript
+2. **Backend:** Node.js + Express (prototype) with JavaScript (ESM)
 3. **Database:** SQLite for prototype, PostgreSQL+PostGIS for production
 4. **Data Source:** OurAirports canonical + Wikidata enrichment
 5. **Indexing:** Per-language `search_as_you_type` fields + `rank_feature` for popularity
