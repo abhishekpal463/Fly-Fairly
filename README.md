@@ -81,12 +81,6 @@ npm run eval
 
 Tests golden queries against the API and compares results to baseline.
 
-### Run Tests
-
-```bash
-npm test
-```
-
 ## API Endpoints
 
 ### GET `/health`
