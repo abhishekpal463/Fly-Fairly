@@ -13,8 +13,8 @@ export type AutocompleteOptions = {
   type?: 'airport' | 'city' | 'both';
 };
 
-export async function autocomplete(opts: AutocompleteOptions) {
-  const { q, size = 8, lat, lon, type = 'both' } = opts;
+export async function autocomplete(options: AutocompleteOptions) {
+  const { q, size = 8, lat, lon, type = 'both' } = options;
 
   const qRaw = String(q || '').trim();
   const qUpper = qRaw.toUpperCase();
@@ -84,14 +84,14 @@ export async function autocomplete(opts: AutocompleteOptions) {
   const hits = (response && response.body && response.body.hits && response.body.hits.hits)
     || (response && response.hits && response.hits.hits)
     || [];
-  return hits.map((h: any) => ({ id: h._id, score: h._score, source: h._source }));
+  return hits.map((hit: any) => ({ id: hit._id, score: hit._score, source: hit._source }));
 }
 
 export default client;
 
 export async function searchByCode(code: string, size = 8) {
-  const c = String(code || '').trim().toUpperCase();
-  if (!c) return [];
+  const searchCode = String(code || '').trim().toUpperCase();
+  if (!searchCode) return [];
 
   const body: any = {
     size,
@@ -104,12 +104,12 @@ export async function searchByCode(code: string, size = 8) {
   };
 
   // prefer IATA (3) and ICAO (4) but try both
-  body.query.bool.should.push({ term: { iata_code: { value: c, boost: 6 } } });
-  body.query.bool.should.push({ term: { icao_code: { value: c, boost: 5 } } });
+  body.query.bool.should.push({ term: { iata_code: { value: searchCode, boost: 6 } } });
+  body.query.bool.should.push({ term: { icao_code: { value: searchCode, boost: 5 } } });
 
   const response: any = await client.search({ index: INDEX, body });
   const hits = (response && response.body && response.body.hits && response.body.hits.hits)
     || (response && response.hits && response.hits.hits)
     || [];
-  return hits.map((h: any) => ({ id: h._id, score: h._score, source: h._source }));
+  return hits.map((hit: any) => ({ id: hit._id, score: hit._score, source: hit._source }));
 }
