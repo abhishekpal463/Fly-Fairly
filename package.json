@@ -2,15 +2,12 @@
   "name": "airport-autocomplete",
   "version": "0.1.0",
   "description": "Production-quality airport and city autocomplete service for Fly Fairly",
-  "main": "backend/src/index.ts",
+  "main": "backend/src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only backend/src/index.ts",
-    "build": "tsc",
-    "start": "node backend/dist/index.js",
-    "etl:ingest": "ts-node-dev data/etl/ingest_ourairports.ts",
+    "dev": "node --watch backend/src/index.js",
+    "start": "node backend/src/index.js",
     "test": "jest",
-    "test:watch": "jest --watch",
     "eval": "node tests/eval/harness.js"
   },
   "keywords": [

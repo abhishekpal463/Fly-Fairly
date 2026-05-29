@@ -1,4 +1,4 @@
-import * as svc from '../dist/services/searchClient.js';
+import * as svc from '../src/services/searchClient.js';
 
 (async () => {
   try {

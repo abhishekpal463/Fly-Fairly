@@ -1,4 +1,4 @@
-import { autocomplete, searchByCode } from '../dist/services/searchClient.js';
+import { autocomplete, searchByCode } from '../src/services/searchClient.js';
 
 async function run(q) {
   const size = 5;

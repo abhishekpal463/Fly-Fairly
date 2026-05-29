@@ -1,4 +1,4 @@
-import client from '../dist/services/searchClient.js';
+import client from '../src/services/searchClient.js';
 
 async function run() {
   try {
