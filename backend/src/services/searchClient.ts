@@ -16,68 +16,74 @@ export type AutocompleteOptions = {
 export async function autocomplete(opts: AutocompleteOptions) {
   const { q, size = 8, lat, lon, type = 'both' } = opts;
 
-  // Basic query: use multi_match on search_as_you_type fields and fallback to names_all
-  const must: any[] = [];
+  const qRaw = String(q || '').trim();
+  const qUpper = qRaw.toUpperCase();
+  const isCode = /^[A-Za-z0-9]{2,4}$/.test(qRaw);
+
+  // Build SHOULD clauses
   const should: any[] = [];
 
+  // Strong exact phrase match on combined name
+  should.push({ match_phrase: { name_combined: { query: qRaw, boost: 8 } } });
+
+  // search_as_you_type / prefix matching on names and aliases
   should.push({
     multi_match: {
-      query: q,
+      query: qRaw,
       type: 'bool_prefix',
-      fields: [
-        'names.en',
-        'names.aliases',
-        'name_combined',
-        'names_all'
-      ]
+      fields: ['names.en^3', 'names.aliases^2', 'name_combined^2']
     }
   });
 
-  // Filter by entity_type if requested
+  // Fuzzy fallback on the normalized names_all text field
+  should.push({ match: { names_all: { query: qRaw, fuzziness: 'AUTO', operator: 'and', boost: 0.6 } } });
+
+  // If query looks like a short code, prefer prefix matches on code fields
+  if (isCode) {
+    should.push({ prefix: { iata_code: { value: qUpper, boost: 12 } } });
+    should.push({ prefix: { icao_code: { value: qUpper, boost: 10 } } });
+  }
+
+  // Filters
   const filter: any[] = [];
   if (type === 'airport') filter.push({ term: { entity_type: 'airport' } });
   if (type === 'city') filter.push({ term: { entity_type: 'city' } });
 
-  // Simple bool query with SHOULD clauses; we avoid using `rank_feature` in functions here.
+  const baseQuery: any = { bool: { should, minimum_should_match: 1 } };
+  if (filter.length) baseQuery.bool.filter = filter;
+
+  // Build function_score functions to boost desirable signals (no rank_feature scripting)
+  const functions: any[] = [];
+  if (isCode) {
+    functions.push({ filter: { term: { iata_code: qUpper } }, weight: 20 });
+    functions.push({ filter: { term: { icao_code: qUpper } }, weight: 18 });
+  }
+  // Boost airports with scheduled service and those with an IATA code
+  functions.push({ filter: { term: { has_scheduled_service: true } }, weight: 1.25 });
+  functions.push({ filter: { exists: { field: 'iata_code' } }, weight: 1.15 });
+
+  // Geo proximity boost if provided
+  if (lat != null && lon != null) {
+    functions.push({ gauss: { location: { origin: `${lat},${lon}`, scale: '200km', decay: 0.5 } }, weight: 2 });
+  }
+
   const body: any = {
     size,
     query: {
-      bool: {
-        filter,
-        must,
-        should,
-        minimum_should_match: 1
+      function_score: {
+        query: baseQuery,
+        functions,
+        score_mode: 'sum',
+        boost_mode: 'multiply'
       }
     }
   };
 
-  // Add explicit prefix matches for IATA/ICAO codes (keywords)
-  const code = q.trim().toUpperCase();
-  if (code.length > 0 && code.length <= 4) {
-    body.query.bool.should.push({ prefix: { iata_code: { value: code, boost: 6 } } });
-    body.query.bool.should.push({ prefix: { icao_code: { value: code, boost: 4 } } });
-  }
-
-  // Optional geo distance scoring
-  if (lat != null && lon != null) {
-    body.sort = [
-      {
-        _geo_distance: {
-          location: { lat, lon },
-          order: 'asc',
-          unit: 'km'
-        }
-      }
-    ];
-  }
-
-    // DEBUG: log the request body for troubleshooting
-    console.debug('ES query body:', JSON.stringify(body));
-    const response: any = await client.search({ index: INDEX, body });
-    const hits = (response && response.body && response.body.hits && response.body.hits.hits)
-      || (response && response.hits && response.hits.hits)
-      || [];
-    console.debug('ES hits count:', hits.length);
+  // Execute search
+  const response: any = await client.search({ index: INDEX, body });
+  const hits = (response && response.body && response.body.hits && response.body.hits.hits)
+    || (response && response.hits && response.hits.hits)
+    || [];
   return hits.map((h: any) => ({ id: h._id, score: h._score, source: h._source }));
 }
 
