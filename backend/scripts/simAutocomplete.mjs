@@ -1,33 +1,20 @@
-import express from 'express';
-import { autocomplete, searchByCode } from '../services/searchClient.js';
+import { autocomplete, searchByCode } from '../dist/services/searchClient.js';
 
-const router = express.Router();
-
-router.get('/', async (req, res): Promise<void> => {
-  const q = String(req.query.q || '');
-  if (!q) {
-    res.status(400).json({ error: 'Missing q parameter' });
-    return;
-  }
-
-  const size = parseInt(String(req.query.limit || '8'), 10) || 8;
-  const type = String(req.query.type || 'both') as any;
-  const lat = req.query.lat ? Number(req.query.lat) : undefined;
-  const lon = req.query.lng ? Number(req.query.lng) : undefined;
-
+async function run(q) {
+  const size = 5;
+  const type = 'both';
+  const lat = undefined;
+  const lon = undefined;
   try {
-    // Short-circuit exact IATA/ICAO codes (2-4 alnum chars)
     const codeCandidate = q.trim();
-    let hits: any[] = [];
+    let hits = [];
     if (/^[A-Za-z0-9]{2,4}$/.test(codeCandidate)) {
       hits = await searchByCode(codeCandidate, size);
     }
-
     if (!hits || hits.length === 0) {
       hits = await autocomplete({ q, size, lat, lon, type });
     }
-
-    function formatHit(h: any) {
+    function formatHit(h) {
       const src = h.source || h._source || {};
       const base = { id: h.id, score: h.score };
       if (src.entity_type === 'city' || src.name) {
@@ -57,13 +44,16 @@ router.get('/', async (req, res): Promise<void> => {
         popularity_score: src.popularity_score
       };
     }
-
     const results = hits.map(formatHit);
-    res.json({ query: q, results });
-  } catch (err: any) {
-    console.error('Autocomplete error', err);
-    res.status(500).json({ error: 'Search backend error' });
+    console.log('RESULTS', JSON.stringify(results.slice(0,5), null, 2));
+  } catch (e) {
+    console.error('SIM ERROR', e);
+    process.exit(1);
   }
-});
+}
 
-export default router;
+(async ()=>{
+  await run('LON');
+  await run('London');
+  await run('Vancouver');
+})();

@@ -82,3 +82,28 @@ export async function autocomplete(opts: AutocompleteOptions) {
 }
 
 export default client;
+
+export async function searchByCode(code: string, size = 8) {
+  const c = String(code || '').trim().toUpperCase();
+  if (!c) return [];
+
+  const body: any = {
+    size,
+    query: {
+      bool: {
+        should: [],
+        minimum_should_match: 1
+      }
+    }
+  };
+
+  // prefer IATA (3) and ICAO (4) but try both
+  body.query.bool.should.push({ term: { iata_code: { value: c, boost: 6 } } });
+  body.query.bool.should.push({ term: { icao_code: { value: c, boost: 5 } } });
+
+  const response: any = await client.search({ index: INDEX, body });
+  const hits = (response && response.body && response.body.hits && response.body.hits.hits)
+    || (response && response.hits && response.hits.hits)
+    || [];
+  return hits.map((h: any) => ({ id: h._id, score: h._score, source: h._source }));
+}
