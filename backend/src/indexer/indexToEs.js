@@ -141,7 +141,7 @@ async function main() {
   await ensureIndex(client, mappingPath);
 
   // Open DB and read canonical rows
-  const dbPath = path.resolve(__dirname, '../../../../data/database/airports.db');
+  const dbPath = path.resolve(process.cwd(), 'data/database/airports.db');
   const dbDir = path.dirname(dbPath);
   try {
     await fs.mkdir(dbDir, { recursive: true });

@@ -39,6 +39,29 @@ airport-autocomplete/
 npm install
 ```
 
+### Run the Data Pipeline (ETL)
+Before indexing data into Elasticsearch, we must process the raw data and build the local SQLite database. Run these four Python scripts sequentially from the project root folder:
+
+##### Step A: Download latest OurAirports data and ingest into SQLite database
+```bash
+python3 data/etl/ingest_ourairports.py
+```
+
+##### Step B: Normalize text and remove duplicate entries
+```bash
+python3 data/etl/normalize_dedupe.py
+```
+
+##### Step C: Group nearby airports to discover Multi-Airport Cities (MACs)
+```bash
+python3 data/etl/detect_macs_emit_cities.py
+```
+
+##### Step D: Calculate smart relevancy ranking and popularity scores
+```bash
+python3 data/etl/compute_popularity.py
+```
+
 ### Start Local Elasticsearch
 
 ```bash
@@ -185,7 +208,3 @@ For production:
 - Expand multilingual analyzers (currently using `names_all` fallback)
 - Add geospatial decay and user personalization signals
 - Consider hosted Elasticsearch (Elastic Cloud, Amazon OpenSearch Service)
-
-## License
-
-MIT
