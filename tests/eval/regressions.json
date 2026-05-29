@@ -1,0 +1,27 @@
+[
+  {
+    "query": "Vancouver",
+    "mustContain": "Vancouver",
+    "description": "Major city query should surface Vancouver-related airports"
+  },
+  {
+    "query": "London",
+    "mustContain": "London",
+    "description": "Ambiguous city query should return London-related results"
+  },
+  {
+    "query": "Tokyo",
+    "mustContain": "Tokyo",
+    "description": "Japanese city query should return Tokyo-related airports"
+  },
+  {
+    "query": "Londn",
+    "mustContain": "London",
+    "description": "Typo tolerance should still recover London results"
+  },
+  {
+    "query": "JFK",
+    "mustContain": "JFK",
+    "description": "Exact IATA short-circuit should return JFK when available"
+  }
+]
