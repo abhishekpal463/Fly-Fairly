@@ -11,22 +11,10 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Placeholder: /autocomplete endpoint
-app.get('/autocomplete', (req, res): void => {
-  const { q, lang: _lang, lat: _lat, lng: _lng, limit: _limit = 8, type: _type = 'both' } = req.query;
-  
-  if (!q) {
-    res.status(400).json({ error: 'Missing query parameter: q' });
-    return;
-  }
+import autocompleteRouter from './routes/autocomplete.js';
 
-  // TODO: Implement autocomplete logic
-  res.json({
-    query: q,
-    results: [],
-    message: 'Autocomplete endpoint not yet implemented'
-  });
-});
+// Autocomplete route
+app.use('/autocomplete', autocompleteRouter);
 
 // Error handling
 app.use((_err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
