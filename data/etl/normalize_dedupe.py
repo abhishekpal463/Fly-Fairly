@@ -18,7 +18,7 @@ import sys
 import time
 import os
 
-DB_PATH = Path(__file__).resolve().parents[1] / 'staging' / 'airports.db'
+DB_PATH = Path(__file__).resolve().parents[1] / 'database' / 'airports.db'
 THRESHOLD_KM = 0.5
 
 KEEP_TYPES = set(['large_airport', 'medium_airport', 'small_airport'])

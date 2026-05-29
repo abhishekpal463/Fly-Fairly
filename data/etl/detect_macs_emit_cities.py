@@ -18,7 +18,7 @@ import sys
 import time
 import os
 
-DB_PATH = Path(__file__).resolve().parents[1] / 'staging' / 'airports.db'
+DB_PATH = Path(__file__).resolve().parents[1] / 'database' / 'airports.db'
 MAC_THRESHOLD_KM = 50.0
 
 

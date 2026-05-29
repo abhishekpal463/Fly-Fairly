@@ -141,7 +141,13 @@ async function main() {
   await ensureIndex(client, mappingPath);
 
   // Open DB and read canonical rows
-  const dbPath = path.resolve(process.cwd(), 'data/database/airports.db');
+  const dbPath = path.resolve(__dirname, '../../../../data/database/airports.db');
+  const dbDir = path.dirname(dbPath);
+  try {
+    await fs.mkdir(dbDir, { recursive: true });
+  } catch (err) {
+    // Directory already exists or can't be created
+  }
   const db = new Database(dbPath, { readonly: true });
 
   const canonicalRows = db.prepare('SELECT airport_id, ident, iata_code, icao_code, type, name_official, name_norm, latitude, longitude, elevation_ft, iso_country, iso_region, municipality, has_scheduled_service, popularity_score, city_id FROM airports_canonical').all();
