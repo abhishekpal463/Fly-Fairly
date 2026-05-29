@@ -20,7 +20,7 @@ import sys
 import os
 import time
 
-DB_PATH = Path(__file__).resolve().parents[1] / 'staging' / 'airports.db'
+DB_PATH = Path(__file__).resolve().parents[1] / 'database' / 'airports.db'
 
 CANDIDATE_PASSENGER_COLS = [
     'annual_passengers', 'passengers', 'passenger_count', 'passengers_per_year',

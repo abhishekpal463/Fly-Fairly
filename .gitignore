@@ -55,6 +55,6 @@ venv/
 env/
 
 # ETL data (keep artifacts from runs for audit)
-data/staging/
+data/database/
 data/output/
 *.csv.bak

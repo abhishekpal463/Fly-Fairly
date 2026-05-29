@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 
 OURAIRPORTS_URL = "https://ourairports.com/data/airports.csv"
-DATA_DIR = Path(__file__).resolve().parents[1] / "staging"
+DATA_DIR = Path(__file__).resolve().parents[1] / "database"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CSV_PATH = DATA_DIR / "airports.csv"
 DB_PATH = DATA_DIR / "airports.db"
